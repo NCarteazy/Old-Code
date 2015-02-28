@@ -1,0 +1,273 @@
+/****************************************************************
+ TETRIS COMPSCI48
+ ERNESTO MARTINEZ
+ CHAZ GECK
+ ANTHONY GASTON
+ NICHOLAS CARTER
+ V1.32
+ DUE 5/20/2013
+
+ This program allows you to play the classic 1985 Tetris game.
+ ****************************************************************/
+
+#include "DarkGDK.h"
+#include <cstdlib>
+#include "block.h"
+#include "shape.h"
+//color declarations
+const DWORD grn = dbRGB(0, 255, 0);
+const DWORD red = dbRGB(255, 0, 0);
+const DWORD ylw = dbRGB(255, 255, 0);
+const DWORD drkblu = dbRGB(121, 88, 255);
+const DWORD magenta = dbRGB(255, 10, 255);
+const DWORD blu = dbRGB(243, 84, 190);
+const DWORD orange = dbRGB(255, 165, 0);
+const DWORD white = dbRGB(255, 255, 255);
+const DWORD blk = dbRGB(0, 0, 0);
+const DWORD bg = dbRGB(100, 255, 255);
+
+//determines the size of the blocks
+int blksize = 20;
+
+//our two boards to help check if lines are full, etc. board is boolean to tell if occupied. colorboard has the colors of the blocks
+bool board[21][11];
+DWORD colorboard[21][11];
+
+void linedrop(int); //pulls down a line after a line has been cleared.
+bool endcheck(); //just as the name shows, it checks if the game is over. returns a bool value if the game is supposed to end
+int total = 0;
+void active();
+void drawboard(); //uses the two 2d boards to create the game screen and fills the appropriate boxes
+void linecheck(); //checks to see if lines are full, from top to bottom. if a line is full, it sends the y value of that line to lineclear
+void lineclear(int); //uses the line given to it from linecheck to clear and then calls on linedrop.
+void normboard(); //fills both of our 2d arrays with the default colors and values
+void score(int); //by inputting a value, it adds that value to the current score. to be used later with showscore.
+
+
+
+shape* getnewshape(); //returns a new shape to be used, when called it provides a random shape.
+
+void updateboard(shape*); //takes the shape that is currently being controlled and fills the 2d board with its current location
+
+void showscore(int); //displays the current score in the upper corner.
+
+void DarkGDK(void) {
+
+//these build the title screen and show directions
+	dbSetWindowTitle("TETRIS");
+	dbInk(white, blk);
+	dbSetTextSize(50);
+	dbText(225, 30, "TETRIS");
+	dbText(250, 175, "HELP:");
+	dbSetTextSize(15);
+	dbText(250, 250, "Up Arrow: Rotate");
+	dbText(250, 285, "Left Arrow: Move Left");
+	dbText(250, 315, "Right Arrow: Move Right");
+	dbText(250, 350, "Press any key to continue at the end of the game");
+	dbText(250, 380, "Press Any Key To Start!");
+	dbSetTextFont("Arial");
+	dbWaitKey();
+
+//active is used to display the text that is used during the game.
+	active();
+
+//previousy will be used to check if the current y location is the same as the previous one. if it is then it signifies that the block is done moving and will create a new one.
+	int previousy = 0;
+
+	normboard();
+	dbSyncOn();
+	dbSyncRate(5);
+
+	dbRandomize(dbMouseX() * dbMouseY()); //this gives a unique seed for every game, determined by where the mouse is located
+	shape* currentshape = getnewshape();
+
+//this creates the outline of the gameboard
+	dbInk(orange, white);
+	dbLine(198, 0, 199, 400);
+	dbLine(199, 400, 399, 400);
+	dbLine(400, 0, 400, 400);
+
+	while (LoopGDK()) {
+
+		currentshape->checker = false;
+		previousy = currentshape->blocks[0].gety(); //updated at the start of the turn
+
+		currentshape->moveinput(*currentshape); //moves the block
+
+		if (!currentshape->checker)
+			currentshape->shapedraw();
+
+//checks to see if the block has moved
+		if (previousy + 1 != currentshape->blocks[0].gety()
+				&& previousy + 2 != currentshape->blocks[0].gety()) {
+			updateboard(currentshape);
+			linecheck(); //checks to see if the block that has just been placed fills a line
+			currentshape = getnewshape(); //grabs a new shape
+			if (endcheck()) //checks to see if the block that was just spawned ends the game
+			{
+
+				dbWaitKey();
+				normboard();
+				drawboard();
+				score(-total);
+			}
+			previousy = 0;
+		}
+		dbSync();
+	}
+	return;
+}
+
+void updateboard(shape* curshape) {
+	for (int i = 0; i <= 3; i++) {
+		board[curshape->blocks[i].gety()][curshape->blocks[i].getx()] = true;
+		colorboard[curshape->blocks[i].gety()][curshape->blocks[i].getx()] =
+				curshape->blocks[i].getcolor();
+	}
+}
+
+void normboard() {
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 20; j++) {
+			board[j][i] = false;
+			colorboard[j][i] = bg;
+		}
+	}
+	for (int a = 0; a <= 11; a++)
+		board[20][a] = true;
+	for (int b = 0; b < 20; b++) {
+		board[b][-1] = true;
+		board[b][10] = true;
+	}
+
+	drawboard();
+	return;
+}
+
+//the way that this works is that if a block is filled, it draws the x over the block. if not, the single block is placed.
+void drawboard() {
+	for (int i = 0; i < 20; i++) {
+
+		for (int j = 0; j < 10; j++) {
+			dbInk(blk, blk);
+			dbBox(j * 20 + 200, i * 20, (j * 20) + 220, (i * 20) + 20);
+			dbInk(colorboard[i][j], colorboard[i][j]);
+			dbBox(j * 20 + 201, i * 20 + 1, (j * 20) + 219, (i * 20) + 19);
+			dbInk(blk, blk);
+			if (board[i][j]) {
+				dbLine(j * 20 + 200, i * 20, (j * 20) + 220, (i * 20) + 20);
+				dbLine(j * 20 + 220, i * 20, (j * 20) + 200, i * 20 + 20);
+			}
+		}
+	}
+}
+
+//this is the same getnewshape that was covered in class
+shape* getnewshape() {
+	int x, y, randnum;
+	x = 4;
+	y = 0;
+	shape* randomshape;
+	randnum = dbRND(6);
+	switch (randnum) {
+	case 0:
+		randomshape = new Oshape(x, y);
+		break;
+	case 1:
+		randomshape = new Ishape(x, y);
+		break;
+	case 2:
+		randomshape = new Lshape(x, y);
+		break;
+	case 3:
+		randomshape = new Zshape(x, y);
+		break;
+	case 4:
+		randomshape = new Tshape(x, y);
+		break;
+	case 5:
+		randomshape = new Sshape(x, y);
+		break;
+	case 6:
+		randomshape = new Jshape(x, y);
+		break;
+	default:
+		;
+	}
+	return randomshape;
+}
+
+void linecheck() {
+	int xaxis = 9;
+	int yaxis = 19;
+	int counter = 0;
+	int n, i;
+	for (n = 0; n <= yaxis; n++) {
+		for (i = 0; i <= xaxis; i++) {
+			if (board[n][i]) {
+				counter++;
+			}
+		}
+		if (counter == 10) {
+			lineclear(n);
+		}
+		counter = 0;
+	}
+	drawboard();
+	return;
+}
+
+void lineclear(int yline) {
+
+//this works by setting all values on the board in that row to false and changes their color.
+	for (int k = 0; k <= 9; k++) {
+		board[yline][k] = false;
+		colorboard[yline][k] = blk;
+	}
+	linedrop(yline);
+	score(100);
+	return;
+}
+
+void linedrop(int yline) {
+	for (int i = yline; i > 0; i--) {
+		for (int j = 0; j <= 9; j++) {
+			board[i][j] = board[i - 1][j];
+			colorboard[i][j] = colorboard[i - 1][j];
+		}
+
+	}
+	return;
+}
+
+bool endcheck() {
+	if (board[0][4])
+		return true;
+	else
+		return false;
+}
+
+//whenever this is called on, the plus is added to the current score and then it is displayed.
+void score(int plus) {
+	total = total + plus;
+	showscore(total);
+	return;
+}
+
+void showscore(int total_) {
+	dbInk(blk, blk);
+	dbBox(420, 50, 600, 100);
+	dbInk(orange, blk);
+	dbText(420, 50, dbStr(total_));
+
+	return;
+}
+
+void active() {
+	dbInk(blk, blk);
+	dbBox(0, 0, 640, 800);
+	dbInk(orange, blk);
+	dbSetTextSize(30);
+	dbCenterText(120, 10, "TETRIS");
+	dbText(420, 10, "Score:");
+}

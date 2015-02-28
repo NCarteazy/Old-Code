@@ -1,0 +1,148 @@
+/*
+ * shape.cpp
+ *
+ *  Created on: Oct 3, 2014
+ *      Author: Nick
+ */
+
+#include "DarkGDK.h"
+#include <cstdlib>
+#include "block.h"
+#include "shape.h"
+
+shape::shape() //default constructor
+{
+	checker = false;
+	color = dbRGB(0, 0, 0);
+	blocks[0].setvals(9, 19, color);
+	blocks[1].setvals(9, 19, color);
+	blocks[2].setvals(9, 19, color);
+	blocks[3].setvals(9, 19, color);
+}
+
+
+int shape::getshapex(block n) {
+	return n.getx();
+}
+int shape::getshapey(block n) {
+	return n.gety();
+}
+void shape::setshapex(block n, int newx) {
+	n.setx(newx);
+}
+void shape::setshapey(block n, int newy) {
+	n.sety(newy);
+}
+
+//shapemove clears the block that the shape was previously in and then draws it in its new spot.
+void shape::shapemove(int deltx, int delty) {
+	for (int i = 0; i <= 3; i++)
+		blocks[i].clear();
+	for (int i = 0; i <= 3; i++)
+		blocks[i].move(deltx, delty);
+}
+
+void shape::shapedraw() {
+	for (int n = 0; n <= 3; n++)
+		blocks[n].draw();
+}
+
+//these checkers only return true if each of the blocks are in the bounds
+bool shape::shapecheckL() {
+	int trigger = 0;
+	for (int n = 0; n <= 3; n++) {
+		if (blocks[n].boundcheckL())
+			trigger++;
+		if (trigger == 4)
+			return true;
+	}
+	return false;
+}
+
+bool shape::shapecheckR() {
+	int trigger = 0;
+	for (int n = 0; n <= 3; n++) {
+		if (blocks[n].boundcheckR())
+			trigger++;
+		if (trigger == 4)
+			return true;
+	}
+	return false;
+}
+
+bool shape::shapecheckD() {
+	int trigger = 0;
+	for (int n = 0; n <= 3; n++) {
+		if (blocks[n].boundcheckD())
+			trigger++;
+		if (trigger == 4)
+			return true;
+	}
+	return false;
+}
+
+//shaperotate turns the shape 90degrees to the left using the concept of a transformation matrix
+//it sees if the rotated shape is in bounds first, and if it is then it rotates the actual shape for real
+void shape::shaperotate(shape testshape) {
+	bool testedcheck = false;
+	for (int n = 0; n < 4; n++) {
+		int new_x = testshape.getshapex(testshape.blocks[0])
+				+ testshape.getshapey(testshape.blocks[0])
+				- testshape.getshapey(testshape.blocks[n]);
+		int new_y = testshape.getshapey(testshape.blocks[0])
+				- testshape.getshapex(testshape.blocks[0])
+				+ testshape.getshapex(testshape.blocks[n]);
+		testshape.blocks[n].setx(new_x);
+		testshape.blocks[n].sety(new_y);
+		if (testshape.shapecheckR() && testshape.shapecheckD()
+				&& testshape.shapecheckL())
+			testedcheck = true;
+	}
+	if (testedcheck) {
+		for (int n = 0; n < 4; n++) {
+			blocks[n].clear();
+			int new_x = getshapex(blocks[0]) + getshapey(blocks[0])
+					- getshapey(blocks[n]);
+			int new_y = getshapey(blocks[0]) - getshapex(blocks[0])
+					+ getshapex(blocks[n]);
+			blocks[n].setx(new_x);
+			blocks[n].sety(new_y);
+		}
+	}
+	shapedraw();
+
+	return;
+}
+
+//checks to see if any of the arrow keys are being used and if the shape is in bounds. if it is in bounds where the direction is requested, the shape moves.
+//it always moves down one space.
+void shape::moveinput(shape dubshape) {
+	if (dbLeftKey() && shapecheckL()) {
+		drawboard();
+		shapemove(-1, 0);
+	}
+
+	else if (dbRightKey() && shapecheckR()) {
+		drawboard();
+		shapemove(1, 0);
+	}
+
+	else if (dbDownKey() && shapecheckD()) {
+		score(2);
+		drawboard();
+		shapemove(0, 1);
+	}
+
+	if (dbUpKey() && blocks[0].getcolor() != red) {
+		drawboard();
+		shaperotate(dubshape);
+		checker = true;
+	}
+
+	if (shapecheckD()) {
+		score(1);
+		drawboard();
+		shapemove(0, 1);
+	}
+	return;
+}

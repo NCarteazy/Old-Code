@@ -1,0 +1,1 @@
+Z = fzero(deltafind,0,pi/2)

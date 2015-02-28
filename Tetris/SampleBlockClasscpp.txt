@@ -1,0 +1,91 @@
+/*
+ * block.cpp
+ *
+ *  Created on: Oct 3, 2014
+ *      Author: Nick
+ */
+#include "DarkGDK.h"
+#include <cstdlib>
+#include "block.h"
+
+block::block() {
+	xinit = 0;
+	yinit = 0;
+	x = 0;
+	y = 0;
+	color = blk;
+}
+block::block(int xval, int yval, const DWORD D_color) {
+	x = xval;
+	y = yval;
+	color = D_color;
+	draw();
+}
+int block::getx() {
+	return x;
+}
+int block::gety() {
+	return y;
+}
+DWORD block::getcolor() {
+	return color;
+}
+
+void block::draw() {
+	dbInk(blk, blk);
+	dbBox(x * 20 + 200, y * 20, (x * 20) + 220, (y * 20) + 20);
+	dbInk(color, color);
+	dbBox(x * 20 + 201, y * 20 + 1, (x * 20) + 219, (y * 20) + 19);
+	dbInk(blk, blk);
+	dbLine(x * 20 + 200, y * 20, (x * 20) + 220, (y * 20) + 20);
+	dbLine(x * 20 + 220, y * 20, (x * 20) + 200, y * 20 + 20);
+}
+
+void block::setvals(int xval, int yval, DWORD d_color) {
+	x = xval;
+	y = yval;
+	color = d_color;
+}
+
+void block::move(int dx, int dy) {
+	x = x + dx;
+	y = y + dy;
+	draw();
+}
+
+//clear is used to delete the block from its previous position
+void block::clear() {
+	dbInk(blk, blk);
+	dbBox(x * 20 + 200, y * 20, (x * 20) + 220, (y * 20) + 20);
+	dbInk(bg, blk);
+	dbBox(x * blksize + 201, y * blksize + 1, x * blksize + blksize + 199,
+			y * blksize + blksize - 1);
+}
+
+void block::setx(int newx) {
+	x = newx;
+}
+void block::sety(int newy) {
+	y = newy;
+}
+
+//bound checks see if the block is currently in the board map. if it is on the edge then it returns false.
+bool block::boundcheckL() {
+	if (board[y][x - 1])
+		return false;
+	else
+		return true;
+}
+bool block::boundcheckR() {
+	if (board[y][x + 1])
+		return false;
+	else
+		return true;
+}
+bool block::boundcheckD() {
+	if (board[y + 1][x])
+		return false;
+	else
+		return true;
+}
+

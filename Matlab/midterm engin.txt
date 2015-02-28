@@ -1,0 +1,73 @@
+DUE by Thursday, October 25th at 6:50pm 
+No collaborations with colleagues. 
+
+Name: _____________________________________
+
+
+INSTRUCTIONS: 
+a.	Write your name on the top of the page.
+b.	Write legibly.
+c.	Show work as needed to justify your answers.
+d.	Comment your code (using % symbols).
+e.	Copy and paste your scripts AND your results from MATLAB in this word document.
+f.	Save your work as one word document (no matlab “.m” file accepted).
+g.	Email your work (one attachment only) to fpaltera@losmedanos.edu by the due date. (You will receive a confirmation email after emailing your work).
+
+
+1.	The area of a rectangle is length times width. Find the areas of rectangles with lengths of 1, 3, and 5 cm and with widths of 2, 4, 6, 8 cm. You should have 12 answers.
+
+2.	The following expressions describe the principal contact stresses in the x-, y-, and z- directions, respectively, when two spheres are pressed together with a force F.
+
+
+
+Determine the principal stresses when:
+
+
+
+
+3.	 Given the vector y=[0,-0.2,0.4,-0.6,0.8,-1.0,-1.2,-1.4,1.6]. If z=sin(y), then:
+a.	Determine the minimum and maximum of only the negative values of z.
+b.	Determine the square root of only the positive values of z. 
+
+
+4.	A. Create a vector of eight values that are equally spaced on a logarithm scale. The first value of the vector is 6 and the last value is 106. 
+B. Display the value of the fifth element of the vector created in A.
+C. Create a new vector whose elements are the first, third, fifth and seventh element of the vector created in A.
+
+
+5.	Manipulate the output of magic(5) to produce the following altered matrix:
+
+
+
+
+
+6.	One method of finding an estimate of a parameter d appearing in the Weibull probabilistic density function is obtained from:
+
+
+
+where xi are obtained from random sample of size n, and ß is a known parameter. If x = [72, 82, 97, 103, 113, 117, 126, 127, 127, 139, 154, 159, 199, 207] and ß=3.644, then determine the value of d. If
+
+
+Determine for z=10 the value of N for which .
+
+7.	Solve the following system of equations and determine the value of the determinant, and the inverse of the matrix of coefficients.
+
+
+
+8.	Engineers use both English and SI (Systeme International d’Unites) units on a regular basis. Some fields use primarily one or the other, but many combine the two systems. For Example, the rate of energy input to a stream power plant from burning fossil fuels is usually measured in Btu/hour. However, the electricity produced by the same plant is usually measured in joules/s (Watts). Automobile engines, by contrast, are often rated in house power or in ft lbf/s. Here are some conversion factors relating these different power measurements: 
+
+1kw = 3412.14 Btu/h = 737.56 ft lbf/s
+1	hp = 550 ft lbf/s = 2544.5 Btu/h
+
+Generate a table of conversions from kW to hp. The table should start at 0kW and end at 15 kW. Use the input function to let the user define the increment between table entries. Use disp and fprintf to create a table with a title, column headings, and appropriate spacing. 
+
+9.	 Given the following relation:
+
+
+Where ei and xi are independent vectors of length k. If ei <5, then ei and xi must be added to their respective ei+1 and xi+1 values. If the sum of ei + ei+1 is still <5, then ei+2 is added to the sum of ei + ei+1. This process is repeated until the sum is =5. When ei =5 and the sum of the remaining ei+1, ei+2, …. ek is less than 5, then these remaining values are added to ei. Write a script that computes X2 under the conditions described above. Check your results with the following vectors, which represent three different cases:
+
+a.	x=[1 7 8 6 5 7 3 5 4]; e=[2 6 10 4 3 6 1 2 3];
+b.	x=[7 11 13 6]; e=[6 10 15 7];
+c.	x=[3 14 20 25 14 6 2 0 1 0]; e=[4 12 19 19 14 8 4 2 1 1];
+
+HINT: The most compact script will be obtained by performing tests on the elements of cumsum(e), where the length of e changes as the evaluation procedure progresses.
